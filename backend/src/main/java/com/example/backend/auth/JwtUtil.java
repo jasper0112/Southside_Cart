@@ -1,6 +1,7 @@
 package com.example.backend.auth;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,17 +109,16 @@ public class JwtUtil {
     
     /**
      * 验证token
+     * This method now handles all validation aspects.
      */
-    public Boolean validateToken(String token, String email) {
-        final String tokenEmail = getEmailFromToken(token);
-        return (tokenEmail.equals(email) && !isTokenExpired(token));
-    }
-    
-    /**
-     * 验证token（不检查email）
-     */
-    public Boolean validateToken(String token) {
-        return !isTokenExpired(token);
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            // Log the exception for debugging purposes
+            // e.g., log.error("Invalid JWT token: {}", e.getMessage());
+        }
+        return false;
     }
 }
-

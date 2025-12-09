@@ -32,23 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         
         final String authHeader = request.getHeader("Authorization");
-        
-        String email = null;
         String jwt = null;
         
         // 检查Authorization header格式: "Bearer <token>"
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            try {
-                email = jwtUtil.getEmailFromToken(jwt);
-            } catch (Exception e) {
-                logger.warn("JWT token validation failed: " + e.getMessage());
-            }
-        }
-        
-        // 如果token有效且当前没有认证信息，设置认证
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.validateToken(jwt)) {
+            
+            // 如果token有效且当前没有认证信息，设置认证
+            if (jwtUtil.validateToken(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String email = jwtUtil.getEmailFromToken(jwt);
                 String role = jwtUtil.getClaimFromToken(jwt, claims -> claims.get("role", String.class));
                 
                 // 创建认证对象
@@ -67,4 +59,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
