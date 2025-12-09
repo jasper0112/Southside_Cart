@@ -48,9 +48,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/users/register", "/users/login").permitAll()
-                .requestMatchers("/users/**").authenticated()
-                .anyRequest().permitAll()
+                // Only authentication endpoints are public; everything else requires a valid JWT
+                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
@@ -74,4 +74,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
